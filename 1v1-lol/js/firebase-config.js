@@ -17,14 +17,24 @@ function initRemoteConfig() {
       });
 }
 
-async function sendConfig() {
-  while(conf === undefined || window.unityInstance === undefined)
-  {
-    await sleep(500)
-  }
+// Being called from unity embedded browser on pc version
+async function getRemoteConfigAsync(onFinish) {
+    while(conf === undefined)
+    {
+        await sleep(500)
+    }
 
-  window.unityInstance.SendMessage('PersistantObjects', 'ActivateRemoteConfig', JSON.stringify(conf));
-};
+    onFinish(conf);
+}
+
+async function sendConfig() {
+    while(conf === undefined || window.unityInstance === undefined)
+    {
+        await sleep(500)
+    }
+    
+    window.unityInstance.SendMessage('PersistantObjects', 'ActivateRemoteConfig', JSON.stringify(conf));
+}
 
 function setDefaultValues(remoteConfig){
   remoteConfig.defaultConfig = {
