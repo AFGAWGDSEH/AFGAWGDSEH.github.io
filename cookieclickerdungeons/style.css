@@ -44,9 +44,6 @@ table {
 }
 
 
-/*=====================================================================================
-BASE
-=======================================================================================*/
 html,body
 {
 	width:100%;
@@ -93,24 +90,16 @@ a:active
 
 .inset
 {
-	/*box-shadow:0px 0px 12px #000 inset;*/
+	box-shadow:0px 0px 12px #000 inset;
 }
 
-.titleFont
-{
-	font-family: 'Kavoon', Georgia,serif;
-}
-.title,.section,.lockedTitle
+.title,.section
 {
 	font-family: 'Kavoon', Georgia,serif;
 	font-size:28px;
 	text-shadow:0px 0px 4px #000;
 	color:#fff;
 }
-
-/*=====================================================================================
-SECTIONS
-=======================================================================================*/
 .section
 {
 	padding:16px;
@@ -170,30 +159,11 @@ SECTIONS
 {
 	visibility:hidden;
 }
-.toggledOff
-{
-	opacity:0;
-	display:none;
-}
 .listing:hover .hidden
 {
 	visibility:visible;
 }
 
-.optionBox
-{
-	text-align:center;
-}
-.optionBox .option
-{
-}
-a.option.big
-{
-	font-size:30px;
-	margin:auto;
-	padding:8px 16px;
-	width:80%;
-}
 a.option, .info a
 {
 	display:inline-block;
@@ -248,9 +218,6 @@ a.option.warning:active
 	border-color:#c00;
 }
 
-/*=====================================================================================
-oh forget it this is just a mess
-=======================================================================================*/
 #backgroundLayers, #backgroundLayers div
 {
 	width:100%;
@@ -259,7 +226,7 @@ oh forget it this is just a mess
 	left:0px;
 	top:0px;
 }
-/*
+
 #backgroundLayer1
 {
 	background:url(img/bgBlue.jpg);
@@ -267,13 +234,6 @@ oh forget it this is just a mess
 #backgroundLayer2
 {
 	background:#000 url(img/darkNoise.png);
-}
-*/
-#backgroundCanvas,#backgroundLeftCanvas
-{
-	position:absolute;
-	left:0px;
-	top:0px;
 }
 
 #topBar
@@ -284,7 +244,7 @@ oh forget it this is just a mess
 	width:100%;
 	height:32px;
 	background:url(img/darkNoise.png);
-	box-shadow:0px -2px 4px #666 inset;
+	box-shadow:0px -4px 8px #666 inset;
 	color:#ccc;
 }
 #topBar div
@@ -372,77 +332,6 @@ oh forget it this is just a mess
 	bottom:0px;
 }
 
-
-
-.framed
-{
-	background:#000 url(img/darkNoise.png);
-	padding:4px 8px;
-	margin:4px;
-	border:3px ridge #d2e248;
-	border-color:#c7cd6e #a48836 #845a36 #a48836;
-	border-radius:3px;
-	box-shadow:0px 0px 1px 2px rgba(0,0,0,0.5),0px 2px 4px rgba(0,0,0,0.25),0px 0px 6px 1px rgba(0,0,0,0.5) inset;
-	text-shadow:0px 1px 1px #000;
-	color:#ccc;
-	-webkit-transition: opacity 0.1s ease-out;
-	-moz-transition: opacity 0.1s ease-out;
-	-ms-transition: opacity 0.1s ease-out;
-	-o-transition: opacity 0.1s ease-out;
-	transition: opacity 0.1s ease-out;
-}
-.framed b
-{
-	color:#fff;
-	font-weight:bold;
-}
-.framed .name
-{
-	font-weight:bold;
-	font-size:110%;
-	color:#fff;
-	margin:2px 0px;
-}
-.framed q
-{
-	display:block;
-	position:relative;
-	text-align:right;
-	margin-top:8px;
-	font-style:italic;
-	opacity:0.7;
-	font-size:11px;
-}
-.framed .close
-{
-	position:absolute;
-	top:-5px;
-	right:0px;
-	padding:4px;
-}
-.close
-{
-	font-weight:bold;
-	font-size:16px;
-	text-shadow:0px 0px 2px #000,0px 0px 1px #000;
-	cursor:pointer;
-	font-family:Comic Sans MS;
-	padding:1px 8px 7px 8px;
-}
-.close:hover
-{
-	color:#fff;
-	text-shadow:0px 0px 2px #fff;
-}
-.framed .block
-{
-	padding:8px;
-	margin:2px;
-	border-radius:4px;
-	border:1px solid rgba(255,255,255,0.25);
-	box-shadow:0px 0px 1px #000,0px 0px 1px #000 inset;
-}
-
 #tooltipAnchor
 {
 	position:absolute;
@@ -452,23 +341,43 @@ oh forget it this is just a mess
 #tooltip
 {
 	position:absolute;
-	opacity:0;
-}
-#tooltip .data
-{
-	border-top:1px solid rgba(255,255,255,0.25);
-	margin-top:8px;
-	padding:4px 0px;
-	font-size:80%;
+	background:#000 url(img/darkNoise.png);
+	padding:4px 8px;
+	margin:4px;
+	border:3px ridge #d2e248;
+	border-color:#c7cd6e #a48836 #845a36 #a48836;
+	border-radius:3px;
+	box-shadow:0px 0px 1px 2px rgba(0,0,0,0.5),0px 2px 4px rgba(0,0,0,0.25),0px 0px 6px 1px rgba(0,0,0,0.5) inset;
+	text-shadow:0px 1px 1px #000;
+	color:#ccc;
 }
 
+#tooltip b
+{
+	color:#fff;
+	font-weight:bold;
+}
+#tooltip .name
+{
+	font-weight:bold;
+	font-size:110%;
+	color:#fff;
+	margin:2px 0px;
+}
 .description
 {
-	border-top:1px solid rgba(255,255,255,0.25);
-	padding-top:2px;
 	margin:4px 0px;
 }
 
+#tooltip q
+{
+	display:block;
+	position:relative;
+	text-align:right;
+	margin-top:8px;
+	font-style:italic;
+	opacity:0.7;
+}
 q:before
 {
 	display:inline-block;
@@ -487,16 +396,6 @@ q:after
 	color:#6f6;
 	padding-left:18px;
 	position:relative;
-}
-.price .tinyCookie
-{
-	display:block;
-	position:absolute;
-	left:0px;
-	top:2px;
-	width:16px;
-	height:16px;
-	cursor:pointer;
 }
 .price.disabled, .disabled .price
 {
@@ -536,16 +435,48 @@ q:after
 	position:absolute;
 	left:-128px;
 	top:-128px;
-	/*background:url(img/perfectCookie.png);
-	background-size:256px 256px;*/
-	background:url(img/empty.png);/* somehow necessary; an empty div with no background seems to be click-through */
+	background:url(img/perfectCookie.png);
+	background-size:256px 256px;
 	cursor:pointer;
-	z-index:10000;
+	z-index:10;
+	-webkit-transition: opacity 0.1s ease-out,-webkit-transform 0.1s ease-out;
+	-moz-transition: opacity 0.1s ease-out,-moz-transform 0.1s ease-out;
+	-ms-transition: opacity 0.1s ease-out,-ms-transform 0.1s ease-out;
+	-o-transition: opacity 0.1s ease-out,-o-transform 0.1s ease-out;
+	transition: opacity 0.1s ease-out,transform 0.1s ease-out;
 }
 .elderWrath #bigCookie
 {
 	background:url(img/imperfectCookie.png);
 	background-size:256px 256px;
+}
+#bigCookie:hover
+{
+	-webkit-transform:scale(1.05,1.05);opacity:0.9;
+	-moz-transform:scale(1.05,1.05);opacity:0.9;
+	-ms-transform:scale(1.05,1.05);opacity:0.9;
+	-o-transform:scale(1.05,1.05);opacity:0.9;
+	transform:scale(1.05,1.05);opacity:0.9;
+}
+#bigCookie:active
+{
+	-webkit-transform:scale(0.98,0.98);opacity:1;
+	-moz-transform:scale(0.98,0.98);opacity:1;
+	-ms-transform:scale(0.98,0.98);opacity:1;
+	-o-transform:scale(0.98,0.98);opacity:1;
+	transform:scale(0.98,0.98);opacity:1;
+}
+#cookieShine
+{
+	width:512px;
+	height:512px;
+	position:absolute;
+	left:-256px;
+	top:-256px;
+	background:url(img/shine.png);
+	background-size:100%;
+	z-index:5;
+	opacity:0.5;
 }
 #cookieNumbers{position:absolute;top:-80px;}
 .cookieNumber
@@ -620,40 +551,13 @@ q:after
 {
 	position:absolute;
 	left:0px;
-	top:10%;
+	top:15%;
 	width:100%;
 	text-align:center;
 	z-index:200;
 	background:#000;
 	background:rgba(0,0,0,0.4);
 	padding:2px 0px;
-}
-#bakeryNameAnchor
-{
-	position:absolute;
-	left:0px;
-	top:10%;
-	width:100%;
-	z-index:200;
-}
-#bakeryName
-{
-	position:absolute;
-	left:0px;
-	bottom:8px;
-	left:12.5%;
-	width:75%;
-	text-align:center;
-	font-size:20px;
-	background:#000;
-	background:rgba(0,0,0,0.4);
-	border-radius:12px;
-	padding:4px 0px;
-	cursor:pointer;
-}
-#bakeryName:hover
-{
-	text-shadow:0px 0px 8px #fff;
 }
 
 .separatorLeft, .separatorRight
@@ -716,7 +620,7 @@ q:after
 #logButton{bottom:16px;right:-16px;}
 
 #game.onMenu #menu{display:block;}
-#game.onMenu .row{visibility:hidden;}
+#game.onMenu .row{display:none;}
 #menu
 {
 	display:none;
@@ -744,18 +648,18 @@ q:after
 {
 	padding:0px 64px;
 }
-.commentsText q
+#commentsText q
 {
 	font-style:italic;
 }
-.commentsText sig
+#commentsText sig
 {
 	font-size:70%;
 	display:block;
 	text-align:center;
 	opacity:0.7;
 }
-.commentsText sig:before
+#commentsText sig:before
 {
 	content:"-";
 	padding-left:64px;
@@ -765,18 +669,49 @@ q:after
 {
 	height:128px;
 	position:relative;
-	padding-bottom:16px;
+	padding-bottom:32px;
 	display:none;
 	overflow:hidden;
 }
 .row.enabled{display:block;}
-.row .rowCanvas
+.row .content
 {
 	width:100%;
 	height:128px;
-	/*overflow-x:scroll;
-	overflow-y:hidden;*/
-	background:#000;
+	position:absolute;
+	overflow-x:scroll;
+	overflow-y:hidden;
+	padding-bottom:16px;
+}
+.row .background
+{
+	background:#999;
+	position:absolute;
+	left:0px;
+	top:0px;
+	height:100%;
+	z-index:1;
+	min-width:100%;
+}
+.row .backgroundLeft,.row .backgroundRight
+{
+	width:128px;
+	height:128px;
+	position:absolute;
+	top:0px;
+}
+.row .backgroundLeft
+{
+	left:0px;
+}
+.row .backgroundRight
+{
+	right:0px;
+}
+.row .objects
+{
+	position:absolute;
+	z-index:10;
 }
 .row .special
 {
@@ -949,7 +884,6 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 .special .fighter {position:absolute;width:96px;height:96px;}
 .row .info, #sectionLeft .info, .row .specialButton
 {
-	display:none;
 	/*visibility:hidden;*/
 	-webkit-transition: opacity 0.1s ease-out;
 	-moz-transition: opacity 0.1s ease-out;
@@ -1008,38 +942,21 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 	width:100%;
 }
 
-.zoneTitle
+
+#storeTitle
 {
 	text-align:center;
 	padding:8px;
-	width:100%;
-}
-#storeTitle
-{
 	width:284px;
 }
-#buildingsTitle
-{
-	display:none;
-}
-.storeSection
+#upgrades
 {
 	height:60px;
 	width:300px;
 	position:relative;
 	overflow-y:hidden;
-	background:url(img/panelHorizontal.png) repeat-x top;
-	padding-top:16px;
 }
-.storeSection:hover
-{
-	height:auto;
-	min-height:60px;
-}
-#upgrades
-{
-}
-#products
+#upgrades:hover
 {
 	height:auto;
 	min-height:60px;
@@ -1076,7 +993,7 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 }
 .icon,.crate
 {
-	background-image:url(img/icons.png?v=12);
+	background-image:url(img/icons.png?v=1);
 }
 .achievement
 {
@@ -1103,11 +1020,6 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 	opacity:0.6;
 	background:url(img/storeTile.jpg);
 	position:relative;
-	-webkit-transition: opacity 0.25s ease-out, margin-bottom 0.1s ease-out;
-	-moz-transition: opacity 0.25s ease-out, margin-bottom 0.1s ease-out;
-	-ms-transition: opacity 0.25s ease-out, margin-bottom 0.1s ease-out;
-	-o-transition: opacity 0.25s ease-out, margin-bottom 0.1s ease-out;
-	transition: opacity 0.25s ease-out, margin-bottom 0.1s ease-out;
 }
 .product:nth-child(4n-3) {background-position:0px 64px;}
 .product:nth-child(4n-2) {background-position:0px 128px;}
@@ -1121,13 +1033,9 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 {
 	box-shadow:0px 0px 16px #000 inset;
 }
-.product.unlocked.enabled
+.product.enabled
 {
 	opacity:1;
-}
-.product.toggledOff
-{
-	opacity:0;
 }
 .product .icon
 {
@@ -1137,7 +1045,6 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 	left:0px;
 	top:0px;
 	background-repeat:no-repeat;
-	margin:0px;
 }
 .product .content
 {
@@ -1160,78 +1067,6 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 	color:#000;
 	text-shadow:0px 0px 8px #fff;
 }
-.product .icon
-{
-	opacity:0;
-}
-.product.unlocked .icon
-{
-	opacity:1;
-}
-.product .icon.off
-{
-	z-index:100;
-	opacity:1;
-	-webkit-transition: opacity 2s ease-out;
-	-moz-transition: opacity 2s ease-out;
-	-ms-transition: opacity 2s ease-out;
-	-o-transition: opacity 2s ease-out;
-	transition: opacity 2s ease-out;
-}
-.product.unlocked .icon.off
-{
-	opacity:0;
-}
-.product.locked .title {display:none;}
-.product .lockedTitle {display:none;}
-.product.locked .lockedTitle {display:block;}
-
-.product.unlocked:hover{margin-bottom:24px;}
-.product.unlocked .buySell{display:block;}
-.product.unlocked:hover .buySell{opacity:1;height:24px;}
-.buySell
-{
-	position:absolute;
-	bottom:-24px;
-	height:0px;
-	left:0px;
-	width:300px;
-	background:#999;
-	display:none;
-	opacity:0;
-	overflow-x:hidden;
-	-webkit-transition: opacity 0.1s ease-out;
-	-moz-transition: opacity 0.1s ease-out;
-	-ms-transition: opacity 0.1s ease-out;
-	-o-transition: opacity 0.1s ease-out;
-	transition: opacity 0.1s ease-out;
-	background:url(img/darkNoise.png);
-	box-shadow:0px 0px 4px #000 inset;
-	z-index:1000;
-}
-.buySell>div
-{
-	position:absolute;
-	bottom:0px;
-	left:0px;
-	width:100px;
-	padding:4px 0px;
-	text-align:center;
-	font-variant:small-caps;
-	color:#fff;
-	font-weight:bold;
-	font-size:14px;
-	opacity:0.5;
-}
-.buySell>div:hover
-{
-	opacity:1;
-	text-shadow:0px 0px 4px #fff;
-}
-.buySell>div:active
-{
-	text-shadow:none;
-}
 
 .goldenCookie
 {
@@ -1243,144 +1078,6 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 	z-index:10000000000;
 	display:none;
 }
-
-.seasonPopup
-{
-	width:256px;
-	height:256px;
-	background:url(img/goldCookie.png) center center no-repeat;
-	cursor:pointer;
-	position:absolute;
-	z-index:10000000000;
-	display:none;
-}
-
-#darken
-{
-	position:absolute;
-	left:0px;
-	top:0px;
-	right:0px;
-	bottom:0px;
-	background:rgba(0,0,0,0.5);
-	z-index:100000000;
-	display:none;
-}
-
-#promptAnchor
-{
-	position:absolute;
-	left:50%;
-	margin-left:-125px;
-	top:125px;
-	z-index:1000000000;
-	display:none;
-}
-#prompt
-{
-	position:relative;
-	overflow-y:hidden;
-	width:250px;
-	padding:16px;
-	left:-28px;
-}
-#prompt h3
-{
-	width:100%;
-	text-align:center;
-	font-weight:bold;
-	font-size:14px;
-	position:relative;
-	top:-8px;
-}
-#prompt textarea,#prompt input
-{
-	width:100%;
-	margin:0px;
-	position:relative;
-	left:-3px;
-}
-
-
-#notes
-{
-	position:absolute;
-	/*left:0px;
-	bottom:128px;*/
-	left:50%;
-	margin-left:-125px;
-	bottom:0px;
-	z-index:100000000;
-}
-#notes .remaining {padding:3px;opacity:0.75;text-shadow:0px 0px 2px #000,0px 1px 0px #000;}
-.note
-{
-	position:relative;
-	overflow-y:hidden;
-	width:250px;
-	padding-right:16px;
-	left:-28px;
-}
-.note .icon
-{
-	float:left;
-	margin-left:-4px;
-}
-.note h3
-{
-	font-weight:bold;
-	font-size:14px;
-	overflow-y:hidden;
-}
-.note h5
-{
-	opacity:0.6;
-	font-size:12px;
-}
-.note.haspic h3
-{
-	margin-top:4px;
-}
-.note.hasdesc h3
-{
-	border-bottom:1px solid rgba(255,255,255,0.5);
-	padding-bottom:2px;
-}
-.note.nodesc h3
-{
-	text-align:center;
-}
-.sidenote
-{
-	position:absolute;
-	right:0px;
-	bottom:0px;
-	border-radius:16px;
-}
-
-
-#timers
-{
-	width:100%;
-	position:absolute;
-	left:0px;
-	right:0px;
-	bottom:0px;
-	z-index:100000000;
-	pointer-events:none;
-}
-#timers>div
-{
-	background:#000;
-	width:100%;
-	height:8px;
-	background:url(img/timerBars.png) 0px 0px;
-	box-shadow:-30px 0px 15px -15px #fff inset;
-}
-#timers>div#timer-frenzy{background-position:0px 0px;}
-#timers>div#timer-elderFrenzy{background-position:48px -8px;}
-#timers>div#timer-clot{background-position:16px -16px;}
-#timers>div#timer-clickFrenzy{background-position:64px -24px;}
 
 #versionNumber
 {
@@ -1400,36 +1097,25 @@ a.control.middle{left:48px;top:48px;background-position:-48px -48px;}
 	bottom:-16px;
 	left:-16px;
 	z-index:100000000000;
-	padding:12px 12px 24px 24px;
+	padding:8px 8px 24px 24px;
 	font-size:14px;
 	background:#990;
 	border-radius:16px;
 	color:#fff;
-	box-shadow:0px 0px 4px #000, 0px 0px 4px #000 inset;
-	text-shadow:0px 0px 2px #000;
-	border:4px solid #fff;
+	box-shadow:0px 0px 4px #000;
 }
-#alert b {font-weight:bold;}
-#alert small {font-size:80%;}
 
-/*=====================================================================================
-SUPPORT
-=======================================================================================*/
 #support
 {
-	width:300px;
+	width:280px;
 	text-align:center;
 	margin:16px auto;
 }
-.supportComment
+#supportComment
 {
-	opacity:0.75;
-	text-shadow:0px 0px 2px #000,0px 1px 0px #000;
+	opacity:0.5;
 	margin:8px;
-	text-align:center;
 }
-.supportPlaceholder {width:300px;height:250px;position:absolute;left:0px;top:0px;z-index:10;opacity:0.6;}
-.supportPlaceholder>div {margin:20px auto;width:60%;text-align:center;background:#000;color:#fff;font-weight:bold;font-size:80%;border-radius:8px;padding:8px 4px;}
 #donateBox
 {
 	z-index:10000000;
@@ -1442,39 +1128,6 @@ SUPPORT
 }
 #donateBox.on {display:block;}
 
-
-/*=====================================================================================
-NEW AD DISPLAY
-=======================================================================================*/
-/*
-#sectionRight
-{
-	right:160px;
-}
-#sectionMiddle
-{
-	right:478px;
-}
-#sectionAd
-{
-	height:100%;
-	position:absolute;
-	top:0px;
-	right:0px;
-	overflow-x:hidden;
-	width:160px;
-	background:url(img/darkNoise.png);
-}
-.separatorRight
-{
-	right:477px;
-}
-#sectionAd .supportPlaceholder {width:160px;}
-*/
-
-/*=====================================================================================
-STOP THE FANCY
-=======================================================================================*/
 .noFancy *
 {
 	text-shadow:none!important;
@@ -1484,143 +1137,3 @@ STOP THE FANCY
 {
 	text-shadow:0px 0px 4px #000,0px 1px 0px #000!important;
 }
-
-
-/*=====================================================================================
-MOBILE
-=======================================================================================*/
-.mobile #sectionLeft,.mobile #sectionMiddle,.mobile #sectionRight
-{
-	width:100%;
-	position:absolute;
-	left:0px;
-	top:128px;
-	right:0px;
-	bottom:64px;
-	display:none;
-}
-.mobile .separatorLeft,.mobile .separatorRight
-{display:none;}
-
-.mobile .focusLeft #sectionLeft{display:block;}
-.mobile .focusMiddle #sectionMiddle{display:block;}
-.mobile .focusRight #sectionRight{display:block;}
-.mobile .focusMenu #sectionMiddle{display:block;}
-.mobile #sectionMiddle
-{
-	margin:0px;
-	padding:0px;
-}
-.mobile #storeTitle,.mobile #upgrades
-{
-	width:100%;
-}
-.mobile .product
-{
-	width:100%;
-	background-size:100% 400%;
-}
-
-.mobile #game{top:0px;}
-.mobile #topBar,.mobile #versionNumber{display:none;}
-
-#focusButtons
-{
-	display:none;
-	position:fixed;
-	left:0px;
-	bottom:0px;
-	height:64px;
-	width:100%;
-	background:url(img/darkNoise.png);
-	z-index:1000000;
-	font-size:32px;
-}
-#focusButtons:before
-{
-	content:'';
-	display:block;
-	position:absolute;
-	left:0px;
-	top:-16px;
-	background:url(img/blackGradient.png) repeat-x bottom;
-	background-size:100% 100%;
-	width:100%;
-	height:16px;
-	opacity:0.5;
-	pointer-events:none;
-}
-#focusButtons div
-{
-	width:25%;
-	height:50%;
-	cursor:pointer;
-	float:left;
-	background:url(img/buttonTile.jpg);
-	background-size:100% 400%;
-	padding:16px 0px;
-	text-align:center;
-	opacity:0.5;
-}
-#focusButtons div:nth-child(4n-3) {background-position:0px 100%;}
-#focusButtons div:nth-child(4n-2) {background-position:0px 200%;}
-#focusButtons div:nth-child(4n-1) {background-position:0px 300%;}
-#focusButtons div:hover
-{
-	box-shadow:0px 0px 16px #fff inset,0px 0px 1px #000;
-	z-index:20;
-}
-#focusButtons div:active
-{
-	box-shadow:0px 0px 16px #000 inset;
-}
-.focusLeft #focusButtons #focusLeft,.focusMiddle #focusButtons #focusMiddle,.focusRight #focusButtons #focusRight,.focusMenu #focusButtons #focusMenu
-{
-	opacity:1;
-	z-index:20;
-	box-shadow:0px 0px 8px #fff;
-}
-
-#compactOverlay
-{
-	display:none;
-	position:fixed;
-	left:0px;
-	top:0px;
-	height:128px;
-	width:100%;
-	background:url(img/darkNoise.png);
-	z-index:1000000;
-	text-align:center;
-	font-size:16px;
-}
-#compactCommentsText
-{
-	padding:8px 0px;
-	opacity:0.8;
-	position:absolute;
-	width:100%;
-	text-align:center;
-	bottom:16px;
-	left:0px;
-}
-#compactCookies
-{
-	padding:8px 0px;
-	position:absolute;
-	width:100%;
-	height:32px;
-	top:0px;
-	left:0px;
-	font-size:24px;
-	text-shadow:0px 0px 12px rgba(255,255,255,0.5);
-	background:rgba(255,255,255,0.05);
-}
-
-.mobile .row {padding-bottom:16px;}
-
-.mobile #comments, .mobile #cookies {display:none;}
-.mobile #focusButtons, .mobile #compactOverlay/*, .mobile #buildingsTitle*/
-{display:block;}
-
-/**{overflow:hidden!important;}*/
