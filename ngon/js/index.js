@@ -1,4 +1,42 @@
 "use strict";
+
+//convert text into numbers for seed
+Math.hash = s => { for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9); return h ^ h >>> 9 }
+
+// const date1 = new Date()
+// console.log(date1.getUTCHours())
+// document.getElementById("seed").placeholder = Math.initialSeed = String(date1.getUTCDate() * date1.getUTCFullYear()) // daily seed,  day + year
+
+// document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
+
+document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
+Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
+Math.seededRandom = function(min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
+    Math.seed = (Math.seed * 9301 + 49297) % 233280;
+    return min + Math.seed / 233280 * (max - min);
+}
+//Math.seed is set to document.getElementById("seed").value in level.populate level at the start of runs
+// console.log(Math.seed)
+
+
+function shuffle(array) {
+    var currentIndex = array.length,
+        temporaryValue,
+        randomIndex;
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+        // Pick a remaining element...
+        // randomIndex = Math.floor(Math.random() * currentIndex);
+        randomIndex = Math.floor(Math.seededRandom(0, currentIndex)) //Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+    return array;
+}
+
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield | cat.phased
 const cat = {
@@ -35,23 +73,6 @@ const color = { //light
 //     blockS: "#111",
 //     map: "#444",
 // }
-
-function shuffle(array) {
-    var currentIndex = array.length,
-        temporaryValue,
-        randomIndex;
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-        // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        // And swap it with the current element.
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-    return array;
-}
 
 // shrink power up selection menu
 // if (screen.height < 800) {
@@ -131,7 +152,31 @@ window.addEventListener('load', () => {
             }
             if (property === "level") document.getElementById("starting-level").value = Math.max(Number(set[property]) - 1, 0)
             if (property === "noPower") document.getElementById("no-power-ups").checked = Number(set[property])
+            // if (property === "seed") {
+            //     document.getElementById("seed").placeholder = Math.initialSeed = String(set[property])
+            //     Math.seed = Math.abs(Math.hash(Math.initialSeed))
+            //     level.populateLevels()
+            // }
         }
+    } else if (localSettings.isTrainingNotAttempted && localSettings.runCount < 30) { //make training button more obvious for new players
+        // document.getElementById("training-button").style.border = "0px #333 solid";
+        // document.getElementById("training-button").style.fill = "rgb(0, 150, 235)" //"#fff";
+        // document.getElementById("training-button").style.background = "rgb(0, 200, 255)";
+
+        //css classes not working for some reason
+        // document.getElementById("training-button").classList.add('lore-text');
+
+        let myanim = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
+        myanim.setAttribute("id", "myAnimation");
+        myanim.setAttribute("attributeType", "XML");
+        myanim.setAttribute("attributeName", "fill");
+        // myanim.setAttribute("values", "#f55;#cc5;#5c5;#5dd;#66f;#5dd;#5c5;#cc5;#f55"); //rainbow
+        myanim.setAttribute("values", "#5dd;#66f;#5dd");
+        // myanim.setAttribute("values", "#333;rgb(0, 170, 255);#333");
+        myanim.setAttribute("dur", "3s");
+        myanim.setAttribute("repeatCount", "indefinite");
+        document.getElementById("training-button").appendChild(myanim);
+        document.getElementById("myAnimation").beginElement();
     }
 });
 
@@ -214,30 +259,37 @@ const build = {
         if (tech.plasmaBotCount) botText += `<br>plasma-bots: ${tech.plasmaBotCount}`
         if (tech.missileBotCount) botText += `<br>missile-bots: ${tech.missileBotCount}`
 
-        const harm = (1 - m.harmReduction()) * 100
         let text = `<div class="pause-grid-module" style = "font-size: 13px;line-height: 120%;padding: 5px;">`
         if (!simulation.isChoosing) text += `<br><span style="font-size:1.5em;font-weight: 600;">PAUSED</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; press P to resume
 <br><br><svg class="SVG-button" onclick="build.shareURL(false)" width="92" height="20" style="padding:0px; margin: 1px;">
     <g stroke='none' fill='#333' stroke-width="2" font-size="14px" font-family="Ariel, sans-serif"> <text x="5" y="15">copy build url</text></g>
 </svg><br>`
-        text += `<strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}%
-<br><strong class='color-harm'>harm</strong> reduction: ${harm.toFixed(harm > 90 ? 2 : 0)}%
-<br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
-<br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
-${botText}
+        //{ /* <strong class='color-d'>damage</strong> increase: ${((tech.damageFromTech()-1)*100).toFixed(0)}% */ }
+        // <br>damage difficulty reduction: ${((1-m.dmgScale)*100).toFixed(2)}%
+        // <br>effective damage: ${(((tech.damageFromTech()-1)*m.dmgScale)*100).toFixed(0)}%
+        // <br>
+        // <br><strong class='color-d'>damage</strong> =  ${((tech.damageFromTech())*100).toFixed(0)}% × ${((m.dmgScale)*100).toFixed(2)}% = ${(((tech.damageFromTech())*m.dmgScale)*100).toFixed(0)}%
+        /// <br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
+        text +=
+            `
+<br>effective <strong class='color-d'>damage</strong>: ${(tech.damageFromTech() * m.dmgScale).toPrecision(4)}
+<br>damage: ${((tech.damageFromTech())).toPrecision(4)}, difficulty: ${((m.dmgScale)).toPrecision(4)}
 <br>
-<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
+<br>effective <strong class='color-harm'>harm</strong>: ${(simulation.dmgScale*m.harmReduction()).toPrecision(4)}
+<br>reduction: ${(m.harmReduction()).toPrecision(4)}, difficulty: ${(simulation.dmgScale).toPrecision(4)}
+<br>
+${botText}
 <br><strong class='color-h'>health</strong>: (${(m.health*100).toFixed(0)} / ${(m.maxHealth*100).toFixed(0)}) &nbsp; <strong class='color-f'>energy</strong>: (${(m.energy*100).toFixed(0)} / ${(m.maxEnergy*100).toFixed(0)})
 <br><strong class='color-g'>gun</strong>: ${b.activeGun !== null ? b.guns[b.activeGun].name: "null"} &nbsp; <strong class='color-g'>ammo</strong>: ${b.activeGun !== null ? b.guns[b.activeGun].ammo: "0"}
+<br><strong><em>fire delay</em></strong> decrease: ${((1-b.fireCDscale)*100).toFixed(b.fireCDscale < 0.1 ? 2 : 0)}%
+<br><strong class='color-dup'>duplication</strong> chance: ${(tech.duplicationChance()*100).toFixed(0)}%
+<br><strong class='color-m'>tech</strong>: ${tech.totalCount}  &nbsp; <strong class='color-r'>research</strong>: ${powerUps.research.count}  
 <br>position: (${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}) &nbsp; velocity: (${player.velocity.x.toFixed(1)}, ${player.velocity.y.toFixed(1)})
 <br>mouse: (${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)}) &nbsp; mass: ${player.mass.toFixed(1)}      
 <br>
+<br>seed: ${Math.initialSeed}
 <br>level: ${level.levels[level.onLevel]} (${level.difficultyText()}) &nbsp; ${m.cycle} cycles
 <br>${mob.length} mobs, &nbsp; ${body.length} blocks, &nbsp; ${bullet.length} bullets, &nbsp; ${powerUp.length} power ups
-
-<br>damage difficulty scale: ${(b.dmgScale*100).toFixed(2) }%
-<br>harm difficulty scale: ${(simulation.dmgScale*100).toFixed(0)}%
-<br>heal difficulty scale: ${(simulation.healScale*100).toFixed(1)}%
 ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
 </div>`;
         for (let i = 0, len = b.inventory.length; i < len; i++) {
@@ -252,25 +304,25 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         text += `<div class="pause-grid-module" id ="pause-field"><div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if (tech.tech[i].count > 0 && !tech.tech[i].isNonRefundable) {
-                const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
+                const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                 if (tech.tech[i].isFieldTech) {
-                    text += `<div class="pause-grid-module"><div class="grid-title">
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                               <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isGunTech) {
-                    text += `<div class="pause-grid-module"><div class="grid-title">
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title">
                                             <span style="position:relative;">
                                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                                             </span>
-                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else if (tech.tech[i].isLore) {
-                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module"><div class="grid-title lore-text"><div class="circle-grid lore"></div> &nbsp; ${tech.tech[i].name} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 } else {
-                    text += `<div class="pause-grid-module"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
+                    text += `<div class="pause-grid-module" id ="${i}-pause-tech" onclick="powerUps.pauseEjectTech(${i})"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
                 }
             } else if (tech.tech[i].isLost) {
                 text += `<div class="pause-grid-module" style="text-decoration: line-through;"><div class="grid-title">${tech.tech[i].link}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div></div>`
@@ -352,22 +404,19 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         //update tech text //disable not allowed tech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
-            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
+            if (!tech.tech[i].isExperimentHide && !tech.tech[i].isNonRefundable && (!tech.tech[i].isJunk || tech.tech[i].isExperimentalMode || localSettings.isJunkExperiment)) {
                 if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
-                    // console.log(tech.tech[i].name, isAllowed, tech.tech[i].count, tech.haveGunCheck("nail gun"))
-                    const isCount = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
-
+                    const techCountText = tech.tech[i].count > 1 ? `(${tech.tech[i].count}x)` : "";
                     // <div class="circle-grid-small research" style="position:absolute; top:13px; left:30px;opacity:0.85;"></div>
                     if (tech.tech[i].isFieldTech) {
                         techID.classList.remove('experiment-grid-hide');
-
                         techID.innerHTML = `
                         <div class="grid-title">
                             <span style="position:relative;">
                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                 <div class="circle-grid field" style="position:absolute; top:0; left:10px;opacity:0.65;"></div>
                             </span>
-                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
                         </div>`
                         // <div class="circle-grid gun" style="position:absolute; top:-3px; left:-3px; opacity:1; height: 33px; width:33px;"></div>
                         // <div class="circle-grid tech" style="position:absolute; top:5px; left:5px;opacity:1;height: 20px; width:20px;border: #fff solid 2px;"></div>
@@ -380,15 +429,14 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
                                 <div class="circle-grid tech" style="position:absolute; top:0; left:0;opacity:0.8;"></div>
                                 <div class="circle-grid gun" style="position:absolute; top:0; left:10px; opacity:0.65;"></div>
                             </span>
-                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
+                            &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}
                         </div>`
-                    } else
-                    if (tech.tech[i].isJunk) {
-                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                    } else if (tech.tech[i].isJunk) {
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     } else if (tech.tech[i].isExperimentalMode) {
                         techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
                     } else {
-                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${isCount}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                        techID.innerHTML = `<div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link} ${techCountText}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     }
                     //deselect selected tech options if you don't have the tech any more // for example: when bot techs are converted after a bot upgrade tech is taken
                     if (tech.tech[i].count === 0 && techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
@@ -456,10 +504,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             text += `<div id = "gun-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'gun')"><div class="grid-title"><div class="circle-grid gun"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div> ${b.guns[i].description}</div>`
         }
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (!tech.tech[i].isExperimentHide) { //&& (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
-                if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
+            if (!tech.tech[i].isExperimentHide && (!tech.tech[i].isJunk || localSettings.isJunkExperiment)) { //&& (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode)) {
+                if (tech.tech[i].allowed() && (!tech.tech[i].isNonRefundable || tech.tech[i].isExperimentalMode || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
                     if (tech.tech[i].isExperimentalMode) {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title">${tech.tech[i].name}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
+                    } else if (tech.tech[i].isJunk) {
+                        text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid junk"></div> &nbsp; ${tech.tech[i].link}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
                     } else {
                         text += `<div id="tech-${i}" class="experiment-grid-module" onclick="build.choosePowerUp(this,${i},'tech')"><div class="grid-title"><div class="circle-grid tech"></div> &nbsp; ${tech.tech[i].link}</div> ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() :tech.tech[i].description}</div>`
                     }
@@ -475,7 +525,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
             lore.setTechGoal()
             localSettings.difficultyMode = Number(document.getElementById("difficulty-select-experiment").value)
             document.getElementById("difficulty-select").value = document.getElementById("difficulty-select-experiment").value
-            localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         });
         //add tooltips
         for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -510,6 +560,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
     },
     shareURL(isCustom = false) {
         let url = "https://landgreen.github.io/sidescroller/index.html?"
+        url += `&seed=${Math.initialSeed}`
         let count = 0;
         for (let i = 0; i < b.inventory.length; i++) {
             if (b.guns[b.inventory[i]].have) {
@@ -540,16 +591,12 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>": ""}
         navigator.clipboard.writeText(url).then(function() {
             /* clipboard successfully set */
             if (isCustom) {
-                setTimeout(function() {
-                    alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
-                }, 300);
+                setTimeout(function() { alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.') }, 300);
             }
         }, function() {
             /* clipboard write failed */
             if (isCustom) {
-                setTimeout(function() {
-                    alert('copy failed')
-                }, 300);
+                setTimeout(function() { alert('copy failed') }, 300);
             }
             console.log('copy failed')
         });
@@ -633,16 +680,16 @@ function openExperimentMenu() {
 
 //record settings so they can be reproduced in the experimental menu
 document.getElementById("experiment-button").addEventListener("click", () => { //setup build run
-    let field = 0;
-    let inventory = [];
-    let techList = [];
-    if (!simulation.firstRun) {
-        field = m.fieldMode
-        inventory = [...b.inventory]
-        for (let i = 0; i < tech.tech.length; i++) {
-            techList.push(tech.tech[i].count)
-        }
-    }
+    // let field = 0;
+    // let inventory = [];
+    // let techList = [];
+    // if (!simulation.firstRun) {
+    //     field = m.fieldMode
+    //     inventory = [...b.inventory]
+    //     for (let i = 0; i < tech.tech.length; i++) {
+    //         techList.push(tech.tech[i].count)
+    //     }
+    // }
     openExperimentMenu();
 });
 
@@ -709,7 +756,7 @@ const input = {
         document.getElementById("splash-previous-gun").innerHTML = cleanText(input.key.previousGun)[0]
 
         localSettings.key = input.key
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     },
     focus: null,
     setTextFocus() {
@@ -1014,7 +1061,12 @@ window.addEventListener("keydown", function(event) {
                 break
             case "h":
                 // m.health = Infinity
-                m.immuneCycle = Infinity //you can't take damage
+                if (m.immuneCycle === Infinity) {
+                    m.immuneCycle = 0 //you can't take damage
+                } else {
+                    m.immuneCycle = Infinity //you can't take damage
+                }
+
                 // m.energy = Infinity
                 // document.getElementById("health").style.display = "none"
                 // document.getElementById("health-bg").style.display = "none"
@@ -1128,8 +1180,38 @@ document.body.addEventListener("wheel", (e) => {
 //**********************************************************************
 //  local storage
 //**********************************************************************
-let localSettings = JSON.parse(localStorage.getItem("localSettings"));
-if (localSettings) {
+let localSettings
+
+function localstorageCheck() {
+    try {
+        return 'localStorage' in window && window['localStorage'] !== null;
+    } catch (e) {
+        return false;
+    }
+
+}
+if (localstorageCheck()) {
+    localSettings = JSON.parse(localStorage.getItem("localSettings"))
+    if (localSettings) {
+        localSettings.isAllowed = true
+        localSettings.isEmpty = false
+        console.log('localStorage is enabled')
+    } else {
+        console.log('localStorage is enabled, local settings empty')
+        localSettings = {
+            isAllowed: true,
+            isEmpty: true
+        }
+    }
+} else {
+    localSettings = { isAllowed: false }
+    console.log("localStorage is disabled")
+}
+
+
+if (localSettings.isAllowed && !localSettings.isEmpty) {
+    console.log('restoring previous settings')
+
     if (localSettings.key) {
         input.key = localSettings.key
     } else {
@@ -1153,18 +1235,21 @@ if (localSettings) {
     }
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
 } else {
+    console.log('setting default localSettings')
     localSettings = {
+        isJunkExperiment: false,
         isCommunityMaps: false,
         difficultyMode: '2',
         fpsCapDefault: 'max',
         runCount: 0,
+        isTrainingNotAttempted: true,
         levelsClearedLastGame: 0,
         loreCount: 0,
         isHuman: false,
         key: undefined
     };
     input.setDefault()
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     document.getElementById("community-maps").checked = localSettings.isCommunityMaps
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("difficulty-select").value = localSettings.difficultyMode
@@ -1186,13 +1271,13 @@ document.getElementById("fps-select").addEventListener("input", () => {
         simulation.fpsCapDefault = Number(value)
     }
     localSettings.fpsCapDefault = value
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 document.getElementById("community-maps").addEventListener("input", () => {
     simulation.isCommunityMaps = document.getElementById("community-maps").checked
     localSettings.isCommunityMaps = simulation.isCommunityMaps
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 // difficulty-select-experiment event listener is set in build.makeGrid
@@ -1201,7 +1286,7 @@ document.getElementById("difficulty-select").addEventListener("input", () => {
     lore.setTechGoal()
     localSettings.difficultyMode = simulation.difficultyMode
     localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
-    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
 

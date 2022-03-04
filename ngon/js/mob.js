@@ -59,7 +59,7 @@ const mobs = {
         }
 
         function applySlow(whom) {
-            if (!whom.shield && !whom.isShielded && !m.isBodiesAsleep) {
+            if (!whom.shield && !whom.isShielded) {
                 if (whom.isBoss) cycles = Math.floor(cycles * 0.25)
                 let i = whom.status.length
                 while (i--) {
@@ -68,12 +68,13 @@ const mobs = {
                 whom.isSlowed = true;
                 whom.status.push({
                     effect() {
-                        const speedCap = 2
-                        const drag = 0.95
-                        Matter.Body.setVelocity(whom, {
-                            x: Math.min(speedCap, whom.velocity.x) * drag,
-                            y: Math.min(speedCap, whom.velocity.y) * drag
-                        });
+                        if (whom.speed > 2) {
+                            const drag = 0.95
+                            Matter.Body.setVelocity(whom, {
+                                x: whom.velocity.x * drag,
+                                y: whom.velocity.y * drag
+                            });
+                        }
                         Matter.Body.setAngularVelocity(whom, 0);
                         ctx.beginPath();
                         ctx.moveTo(whom.vertices[0].x, whom.vertices[0].y);
@@ -98,11 +99,13 @@ const mobs = {
         }
     },
     statusStun(who, cycles = 180) {
-        if (!who.shield && !who.isShielded && !m.isBodiesAsleep) {
-            Matter.Body.setVelocity(who, {
-                x: who.velocity.x * 0.8,
-                y: who.velocity.y * 0.8
-            });
+        if (!who.shield && !who.isShielded) {
+            if (who.speed > 3) {
+                Matter.Body.setVelocity(who, {
+                    x: who.velocity.x * 0.8,
+                    y: who.velocity.y * 0.8
+                });
+            }
             Matter.Body.setAngularVelocity(who, who.angularVelocity * 0.8);
             //remove other "stun" effects on this mob
             let i = who.status.length
@@ -153,8 +156,8 @@ const mobs = {
         if (!who.isShielded && who.alive && who.damageReduction > 0) {
             who.status.push({
                 effect() {
-                    if ((simulation.cycle - this.startCycle) % 30 === 0 && !m.isBodiesAsleep) {
-                        let dmg = b.dmgScale * this.dmg
+                    if ((simulation.cycle - this.startCycle) % 30 === 0) {
+                        let dmg = m.dmgScale * this.dmg
                         who.damage(dmg);
                         if (who.damageReduction) {
                             simulation.drawList.push({ //add dmg to draw queue
@@ -185,7 +188,7 @@ const mobs = {
     //     who.status.push({
     //       effect() {
     //         if ((simulation.cycle - this.startCycle) % 15 === 0) {
-    //           let dmg = b.dmgScale * tickDamage * 0.5 * (1 + Math.random())
+    //           let dmg = m.dmgScale * tickDamage * 0.5 * (1 + Math.random())
     //           who.damage(dmg);
     //           simulation.drawList.push({ //add dmg to draw queue
     //             x: who.position.x,
@@ -800,48 +803,46 @@ const mobs = {
                     }
                 }
             },
-            invulnerability() {
-                if (this.isInvulnerable) {
-                    if (this.invulnerabilityCountDown > 0) {
-                        this.invulnerabilityCountDown--
-                        //graphics //draw a super shield?
-                        ctx.beginPath();
-                        let vertices = this.vertices;
-                        ctx.moveTo(vertices[0].x, vertices[0].y);
-                        for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
-                        ctx.lineTo(vertices[0].x, vertices[0].y);
-                        ctx.lineWidth = 20;
-                        // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
-                        // ctx.fill();
-                        ctx.strokeStyle = "rgba(255,255,255,0.4)";
-                        ctx.stroke();
-                    } else {
-                        this.isInvulnerable = false
-                        this.damageReduction = this.startingDamageReduction
-                    }
-                }
-            },
+            // invulnerability() {
+            //     if (this.isInvulnerable) {
+            //         if (this.invulnerabilityCountDown > 0) {
+            //             this.invulnerabilityCountDown--
+            //             //graphics //draw a super shield?
+            //             ctx.beginPath();
+            //             let vertices = this.vertices;
+            //             ctx.moveTo(vertices[0].x, vertices[0].y);
+            //             for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+            //             ctx.lineTo(vertices[0].x, vertices[0].y);
+            //             ctx.lineWidth = 20;
+            //             // ctx.fillStyle = `rgba(${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},${Math.floor(255 * Math.random())},0.5)`
+            //             // ctx.fill();
+            //             ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            //             ctx.stroke();
+            //         } else {
+            //             this.isInvulnerable = false
+            //             this.damageReduction = this.startingDamageReduction
+            //         }
+            //     }
+            // },
             grow() {
-                if (!m.isBodiesAsleep) {
-                    if (this.seePlayer.recall) {
-                        if (this.radius < 80) {
-                            const scale = 1.01;
-                            Matter.Body.scale(this, scale, scale);
-                            this.radius *= scale;
-                            // this.torque = -0.00002 * this.inertia;
-                            this.fill = `hsl(144, ${this.radius}%, 50%)`;
-                            if (this.isShielded) { //remove shield if shielded when growing
-                                this.isShielded = false;
-                                this.removeConsBB();
-                            }
+                if (this.seePlayer.recall) {
+                    if (this.radius < 80) {
+                        const scale = 1.01;
+                        Matter.Body.scale(this, scale, scale);
+                        this.radius *= scale;
+                        // this.torque = -0.00002 * this.inertia;
+                        this.fill = `hsl(144, ${this.radius}%, 50%)`;
+                        if (this.isShielded) { //remove shield if shielded when growing
+                            this.isShielded = false;
+                            this.removeConsBB();
                         }
-                    } else {
-                        if (this.radius > 15) {
-                            const scale = 0.99;
-                            Matter.Body.scale(this, scale, scale);
-                            this.radius *= scale;
-                            this.fill = `hsl(144, ${this.radius}%, 50%)`;
-                        }
+                    }
+                } else {
+                    if (this.radius > 15) {
+                        const scale = 0.99;
+                        Matter.Body.scale(this, scale, scale);
+                        this.radius *= scale;
+                        this.fill = `hsl(144, ${this.radius}%, 50%)`;
                     }
                 }
             },
@@ -943,55 +944,53 @@ const mobs = {
                 }
             },
             fire() {
-                if (!m.isBodiesAsleep) {
-                    const setNoseShape = () => {
-                        const mag = this.radius + this.radius * this.noseLength;
-                        this.vertices[1].x = this.position.x + Math.cos(this.angle) * mag;
-                        this.vertices[1].y = this.position.y + Math.sin(this.angle) * mag;
-                    };
-                    //throw a mob/bullet at player
-                    if (this.seePlayer.recall) {
-                        //set direction to turn to fire
-                        if (!(simulation.cycle % this.seePlayerFreq)) {
-                            this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
-                            this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 2500; //gives the bullet an arc  //was    / 1600
-                        }
-                        //rotate towards fireAngle
-                        const angle = this.angle + Math.PI / 2;
-                        const dot = Vector.dot({
-                            x: Math.cos(angle),
-                            y: Math.sin(angle)
-                        }, this.fireDir)
-                        // c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
-                        const threshold = 0.1;
-                        if (dot > threshold) {
-                            this.torque += 0.000004 * this.inertia;
-                        } else if (dot < -threshold) {
-                            this.torque -= 0.000004 * this.inertia;
-                        } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
-                            //fire
-                            spawn.bullet(this.vertices[1].x, this.vertices[1].y, 9 + Math.ceil(this.radius / 15));
-                            const v = 15;
-                            Matter.Body.setVelocity(mob[mob.length - 1], {
-                                x: this.velocity.x + this.fireDir.x * v + 3 * Math.random(),
-                                y: this.velocity.y + this.fireDir.y * v + 3 * Math.random()
-                            });
-                            this.noseLength = 0;
-                            // recoil
-                            this.force.x -= 0.005 * this.fireDir.x * this.mass;
-                            this.force.y -= 0.005 * this.fireDir.y * this.mass;
-                        }
-                        if (this.noseLength < 1.5) this.noseLength += this.fireFreq;
-                        setNoseShape();
-                    } else if (this.noseLength > 0.1) {
-                        this.noseLength -= this.fireFreq / 2;
-                        setNoseShape();
+                const setNoseShape = () => {
+                    const mag = this.radius + this.radius * this.noseLength;
+                    this.vertices[1].x = this.position.x + Math.cos(this.angle) * mag;
+                    this.vertices[1].y = this.position.y + Math.sin(this.angle) * mag;
+                };
+                //throw a mob/bullet at player
+                if (this.seePlayer.recall) {
+                    //set direction to turn to fire
+                    if (!(simulation.cycle % this.seePlayerFreq)) {
+                        this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
+                        this.fireDir.y -= Math.abs(this.seePlayer.position.x - this.position.x) / 2500; //gives the bullet an arc  //was    / 1600
                     }
-                    // else if (this.noseLength < -0.1) {
-                    //   this.noseLength += this.fireFreq / 4;
-                    //   setNoseShape();
-                    // }
+                    //rotate towards fireAngle
+                    const angle = this.angle + Math.PI / 2;
+                    const dot = Vector.dot({
+                        x: Math.cos(angle),
+                        y: Math.sin(angle)
+                    }, this.fireDir)
+                    // c = Math.cos(angle) * this.fireDir.x + Math.sin(angle) * this.fireDir.y;
+                    const threshold = 0.1;
+                    if (dot > threshold) {
+                        this.torque += 0.000004 * this.inertia;
+                    } else if (dot < -threshold) {
+                        this.torque -= 0.000004 * this.inertia;
+                    } else if (this.noseLength > 1.5 && dot > -0.2 && dot < 0.2) {
+                        //fire
+                        spawn.bullet(this.vertices[1].x, this.vertices[1].y, 9 + Math.ceil(this.radius / 15));
+                        const v = 15;
+                        Matter.Body.setVelocity(mob[mob.length - 1], {
+                            x: this.velocity.x + this.fireDir.x * v + 3 * Math.random(),
+                            y: this.velocity.y + this.fireDir.y * v + 3 * Math.random()
+                        });
+                        this.noseLength = 0;
+                        // recoil
+                        this.force.x -= 0.005 * this.fireDir.x * this.mass;
+                        this.force.y -= 0.005 * this.fireDir.y * this.mass;
+                    }
+                    if (this.noseLength < 1.5) this.noseLength += this.fireFreq;
+                    setNoseShape();
+                } else if (this.noseLength > 0.1) {
+                    this.noseLength -= this.fireFreq / 2;
+                    setNoseShape();
                 }
+                // else if (this.noseLength < -0.1) {
+                //   this.noseLength += this.fireFreq / 4;
+                //   setNoseShape();
+                // }
             },
             // launch() {
             //     if (this.seePlayer.recall) {
@@ -1038,12 +1037,10 @@ const mobs = {
                 }
             },
             timeLimit() {
-                if (!m.isBodiesAsleep) {
-                    this.timeLeft--;
-                    if (this.timeLeft < 0) {
-                        this.isDropPowerUp = false;
-                        this.death(); //death with no power up
-                    }
+                this.timeLeft--;
+                if (this.timeLeft < 0) {
+                    this.isDropPowerUp = false;
+                    this.death(); //death with no power up
                 }
             },
             healthBar() { //draw health by mob //most health bars are drawn in mobs.healthbar();
@@ -1160,7 +1157,17 @@ const mobs = {
                     }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 840 //14 seconds
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) {
+                                bullet[i].endCycle = simulation.cycle + 840 //14 seconds
+                                // //draw a flash on top of bot
+                                // ctx.beginPath();
+                                // const v = bullet[i].vertices;
+                                // ctx.moveTo(v[0].x, v[0].y);
+                                // for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
+                                // ctx.lineTo(v[0].x, v[0].y);
+                                // ctx.fillStyle = "#fff"
+                                // ctx.fill();
+                            }
                         }
                     }
                     if (Math.random() < tech.botSpawner) {
@@ -1173,7 +1180,7 @@ const mobs = {
                             powerUps.spawn(this.position.x, this.position.y, "tech", false)
                             // if (0.5 < Math.random()) powerUps.spawn(this.position.x, this.position.y, "tech", false)
                         } else {
-                            const amount = 0.005
+                            const amount = 0.0045
                             if (tech.isEnergyHealth) {
                                 if (m.maxEnergy > amount) {
                                     tech.healMaxEnergyBonus -= amount

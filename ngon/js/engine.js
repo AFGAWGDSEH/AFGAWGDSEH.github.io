@@ -135,7 +135,7 @@ function collisionChecks(event) {
                         }
                         if (tech.isPiezo) m.energy += 20.48;
                         if (tech.isStimulatedEmission) powerUps.ejectTech()
-                        if (mob[k].onHit) mob[k].onHit(k);
+                        if (mob[k].onHit) mob[k].onHit();
                         if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                         //extra kick between player and mob              //this section would be better with forces but they don't work...
                         let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
@@ -174,7 +174,7 @@ function collisionChecks(event) {
                         //mob + bullet collisions
                         if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
                             obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-                            let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                            let dmg = m.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                             if (tech.isCrit && mob[k].isStunned) dmg *= 4
                             // console.log(dmg)
                             mob[k].damage(dmg);
@@ -195,7 +195,7 @@ function collisionChecks(event) {
                         if (obj.classType === "body" && obj.speed > 6) {
                             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                             if (v > 9) {
-                                let dmg = tech.blockDamage * b.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1);
+                                let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1);
                                 if (mob[k].isShielded) dmg *= 0.7
                                 // console.log(dmg)
                                 mob[k].damage(dmg, true);

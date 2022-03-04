@@ -1,35 +1,158 @@
 ******************************************************** NEXT PATCH **************************************************
 
+grapple goes 40% farther before it retracts automatically
+grapple now works well with fire delay reduction
+  or it's annoying, you decide!
+smelting cost more ammo as you increase stacks
 
+grappling hook tech: bulk modulus - immune to harm while grappling, but drain a bit of energy
 
+particle collider renamed pure science - and it gives 1 research instead of energy when it fails: 4% chance
+  
 ******************************************************** TODO ********************************************************
 
-set damage reduction equal to how much mana you have below 95
-  override all other harm reduction effects?
+grappling hook
+  draw the hook part directly
+    two backwards angled spikes near the front
+  give player more control over motion while hanging and retracting
+    reduce friction effects so player swing around?
+    up down left right push player around?
+    scale velocity dampening with distance to grapple?
+    make a variable to track rope length?
 
-make shields not able to get radioactive
+tech that does less damage the more tech you have?
+  tech.totalCount
 
-wormhole tech - pause while placing the wormhole
-tech requires cache - ammo automatically regenerates every second,  ammo is capped even lower
+add coyote jump
+  log game m.cycle when last on ground
+  for jump check if game cycle is < last on ground cycle -2
 
-new level climb
-  3 vertical climb sections
-  use vanish elements
+setting to remove UI, except health bar
+  except active gun? to see ammo
+  checkbox in pause and in settings
 
-ruins: mobs can see you too easily at the start
+tech - Plasma railgun
+  like foam, or phonon?
 
-vanish element:
-  grow as it returns?
-  option to shrink in vertical
+pause time like invariant for other things...
+  throwing blocks
+  charging railgun
+  charging anything?
 
-pull bullets back to player with crouch/field
-  bullets type?:  drones, spores, missiles, 
-  works for all bullets, write custom code based on bullet type
-    bad for: laser, harpoon?, missile and grenade?
+bug - url sharing still broken sometimes
+
++damage for each different bot type you have
+  disables bot upgrades?
+
+tech doing damage refunds up to 50% of damage take in last 10 seconds
+  use history[] to manage this?
+
+tech: frozen mobs die at 10% life
+
+make a seed/hash system that controls only the tech/guns/fields shown
+  URL sharing could include a seed
+  seed controls:
+    seeded random at start - random level boss, mob types list, level order, horizontal flip
+    seeded random during run - tech, gun, field choices
+    not seeded random - mob spawns, mob size, minor level differences, custom level boss choices, ammo rewards, tech effect randomness
+      better to only seed things at the start of the run so it doesn't mess with power up choices
+  make option for a daily seed: seed = day+year
+    give 1 extra tech for doing the daily seeded run
+    make the option for the daily run, a secret exit in the intro level?
+    
+tech upgrade to anthropic principle to make it trigger at 50% life and 0% once per map
+
+tech: spontaneous collapse - very low chance of something to occur
+  JUNK tech
+  https://bindingofisaacrebirth.fandom.com/wiki/Damocles
+
+cloaking field doesn't show energy over max
+
+run more profiles of n-gon to fix performance issues
+
+reactor
+  mineBoss - bounces around and drops mines
+    mines explode with a large radius that can trigger other mines
+      mines have a short delay before exploding so they don't all go up in the same cycle
+  life-like cellular automata boss
+    https://scratch.mit.edu/projects/77724260/
+    night/day?
+      boss on far right produces more "on" cells
+  tailBoss
+    story the last 5 seconds of position, draw damage circles over those positions, like a tail
+  limit mantis boss to only reactor?
+  laserBoss?
+  swoopBoss: hides in top center
+    take a lap around the map that you have to dodge
+    spawn mobs
+    fire sniper bullets?
+    remove center map element?
+  add some blocks to the reactor level
+  add ammo?
+  boss speeds up as time goes on?
+  slow bullet speed?
+  foam hits all the bullets and makes this fight easy
+  give map some background graphics
+  it's a little short
+    add alternate boss
+    add a boss that spawns after the first one dies
+  balance
+    boss damage reduction
+    bullet size
+    bullet spawn number
+    bounce speed
+  add horizontal flip mode
+
+bug:  possibly clearing away all bullets causes a problem
+  bullet.js 255  (.do() is missing)
+  I died and quantum immortality triggered (I had needles and ice-IX)
+  game crashed but recovered
+
+go non-collide with mobs when immune to damage?
+
+mobs that are invulnerable from the front
+
+vertical reversed version of reservoir level, start at top and press buttons to lower slime
+  mechanic: push a very large block into slime in order to stand on it and avoid slime
+
+add anticipation to more mob attacks
+  stabber
+  striker
+
+boss that fires giant bullets, that bounce around and chases you
+
+can mob bullets damage other mob?
+  maybe if they switch collisions and classType === "body" or obj.classType === "bullet"
+
+path finding system
+
+figure out how to get friction effects on map/body to apply to player
+
+growBoss and cellBoss are too similar
+
+variant of Occam's razor - remove 50% of your tech for each removed get:
+  2 bots?
+  50 energy max
+
+tech immune to harm after mob kill
+  require no other mob kill tech?
+  cloaking field tech?
+
+final boss invulnerability
+  until mobs are cleared?
+  in between phases
+  for all of one phase
+
+JUNK tech - do something fun to the mob display health method
+
+new platform element, spring
+  toggle to on when player touches platform    
+  platform extends in any direction
 
 boss that gives nearby mobs invulnerability
+  invulnerability needs to toggle off and on
   boss is only mildly aggressive
-  repulsed by player upto a point
+  repulsed by player up to a point
   attracted to mobs
 
 training
@@ -37,6 +160,9 @@ training
     reset progress to zero if you clear all training levels
     maybe only save progress if you made if past the trainingHeal level
   make the training button more obvious if the account has only played 1-2 times
+    larger?
+    position?
+    animated text?
   uses the lore voice/text code?
   replace all mob clear triggers with button triggers?
   tutorial rooms:
@@ -81,10 +207,6 @@ make a line of constrained mobs move like a snake
 tech: basic research - heal power ups spawn as research power ups instead, and using research heals you (needs to be pretty low, like 3% health)
 tech: maintenance - heals no longer spawn, but using research heals you 100%
 
-tech reversed regression - mobs take less damage after each time you hit them,  but you get +100% damage
-  maybe a gun tech only?
-    what gun?
-
 foam tech - make it move slower, last much longer, and push away other foam bullets
   not sure about bouncing off walls,  but that might be fun too
 
@@ -128,20 +250,10 @@ mob/boss that fires a laser at player, but give player time to avoid
   they target where player was 1 second ago
   they turn to face player?
 
-tech: open a new tab for n-gon, spawn things in the original game based on events in new game
-  if you die in new die in original?
-  new is n-gon classic?
-  make a JUNK tech?
-if you die in original open a tab with a new n-gon that starts on a random level with a random load out.  if you clear the level you come back to life in the original?
-
 bug - death while paused crashes game?
 
 tech rocket jump - jumping produces an explosion at your feet that lets you jump extra high, but does some damage
   require electric reactive armor?
-
-animate going to next level?
-  door fills in with color that climbs up vertically through the door graphic the longer you stand on door
-  hold crouch on door? or automatically
 
 Plasma Burner: upgrade for plasma torch, basically just a jet engine. does high damage, but short range, mostly for player movement.
   maybe reduce gravity to really low then apply a vector away from mouse direction
@@ -336,6 +448,8 @@ n-gon outreach ideas
 
 ******************************************************** BUGS ********************************************************
 
+vanish element bug, crashes on touching element,  happens for 1 person maybe with junk tech?
+
 safari issues
   once: can't pick up blocks
     fixed on new map
@@ -387,11 +501,6 @@ is there a way to check if the player is stuck inside the map or block
 (intermittent, but almost every time) bug - capping the fps causes random slow downs, that can be fixed with pause
 
 ******************************************************** LEVELS ********************************************************
-
-new late game level that is easier if you can: platform well, jump high, immune to slime, wormhole through walls, fly fast
-  climb vertically to avoid rising slime
-  populate with multiple boss mobs that can't drop tech
-    bosses spawn in pairs
 
 map: observatory
   button controls rotation of telescope
@@ -529,6 +638,8 @@ possible names for tech
   hall effect thrusters
   spaghettification
   particle accelerator
+  superluminal signalling
+  NP-complete
  
 a tutorial / lore intro
   needs to be optional so it doesn't slow experienced players
@@ -660,3 +771,36 @@ add sounds
     after grabbing a power up, in the selection menu
     from mobs, damage,inside field
     when activating fields: time, negative mass, 
+
+    //setup audio context
+    function tone(frequency) {
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.25; //controls volume
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = "sine"; // 'sine' 'square', 'sawtooth', 'triangle' and 'custom'
+        oscillator.frequency.value = frequency; // value in hertz
+        oscillator.start();
+        return { oscillator: oscillator, audioCtx: audioCtx }
+    }
+    // https://www.fresnostate.edu/folklore/Olson/JUSTINT.HTM
+    // mixolyd. C      D       E      F+    G      A+    B
+    // key=G   264    297     330   356.40 396*   445.50 495 
+    // const t264 = tone(264)
+    // t264.oscillator.stop(t264.audioCtx.currentTime + 2) //in seconds, not milliseconds for some reason
+    // tone(297)
+    // tone(330)
+    // tone(356.40)
+    // tone(396)
+    // tone(445.50)
+    // tone(495)
+
+
+
+
+
+
+
+

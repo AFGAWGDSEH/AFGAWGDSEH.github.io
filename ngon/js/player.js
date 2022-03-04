@@ -393,6 +393,7 @@ const m = {
         m.drop();
         if (simulation.paused) build.pauseGrid() //update the build when paused
     },
+    dmgScale: null, //scales all damage, but not raw .dmg //set in levels.setDifficulty
     death() {
         if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             //remove immortality tech
@@ -501,7 +502,7 @@ const m = {
     harmReduction() {
         let dmg = 1
         dmg *= m.fieldHarmReduction
-        if (tech.isZeno) dmg *= 0.17
+        if (tech.isZeno) dmg *= 0.15
         if (tech.isFieldHarmReduction) dmg *= 0.5
         if (tech.isHarmMACHO) dmg *= 0.33
         if (tech.isImmortal) dmg *= 0.66
@@ -513,7 +514,7 @@ const m = {
         if (tech.isSlowFPS) dmg *= 0.8
         if (tech.isHarmReduce && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.4
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.1
-        if (tech.isBotArmor) dmg *= 0.92 ** b.totalBots()
+        if (tech.isBotArmor) dmg *= 0.93 ** b.totalBots()
         if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.33;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.energyRegen === 0) dmg *= 0.34
@@ -553,6 +554,7 @@ const m = {
                 }
             }
         }
+
         let history = m.history[(m.cycle - steps) % 600]
         Matter.Body.setPosition(player, history.position);
         Matter.Body.setVelocity(player, { x: history.velocity.x, y: history.velocity.y });
@@ -598,6 +600,7 @@ const m = {
                 if (isDrawPlayer) {
                     isDrawPlayer = false
                     ctx.save();
+                    ctx.globalCompositeOperation = "lighter";
                     ctx.translate(canvas.width2, canvas.height2); //center
                     ctx.scale(simulation.zoom / simulation.edgeZoomOutSmooth, simulation.zoom / simulation.edgeZoomOutSmooth); //zoom in once centered
                     ctx.translate(-canvas.width2 + m.transX, -canvas.height2 + m.transY); //translate
@@ -920,7 +923,7 @@ const m = {
             if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
         }
         if (m.energy < m.maxEnergy) m.energy = m.maxEnergy;
-        m.fieldRegen = tech.energyRegen; //0.001
+        m.fieldRegen = 0.001
         m.fieldMeterColor = "#0cf"
         m.eyeFillColor = m.fieldMeterColor
         m.fieldShieldingScale = 1;
@@ -958,7 +961,7 @@ const m = {
         }
     },
     setMaxEnergy() {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 2 * tech.isGroundState
         simulation.makeTextLog(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
     fieldMeterColor: "#0cf",
@@ -1314,12 +1317,12 @@ const m = {
             m.energy -= fieldBlockCost
             if (m.energy < 0) m.energy = 0;
             m.fieldCDcycle = m.cycle + m.fieldBlockCD;
-            if (tech.blockingIce) {
+            if (tech.blockingIce && !who.isInvulnerable) {
                 for (let i = 0; i < fieldBlockCost * 60 * tech.blockingIce; i++) b.iceIX(3, 2 * Math.PI * Math.random(), m.pos)
             }
             const unit = Vector.normalise(Vector.sub(player.position, who.position))
             if (tech.blockDmg) {
-                who.damage(tech.blockDmg * b.dmgScale, true)
+                who.damage(tech.blockDmg * m.dmgScale, true)
                 //draw electricity
                 const step = 40
                 ctx.beginPath();
@@ -1602,10 +1605,10 @@ const m = {
                         if (tech.isStandingWaveExpand) {
                             if (input.field) {
                                 // const oldHarmonicRadius = m.harmonicRadius
-                                m.harmonicRadius = 0.985 * m.harmonicRadius + 0.015 * 2.5
+                                m.harmonicRadius = 0.99 * m.harmonicRadius + 0.01 * 4
                                 // m.energy -= 0.1 * (m.harmonicRadius - oldHarmonicRadius)
                             } else {
-                                m.harmonicRadius = 0.995 * m.harmonicRadius + 0.005
+                                m.harmonicRadius = 0.994 * m.harmonicRadius + 0.006
                             }
                         }
                         m.harmonicShield()
@@ -1644,7 +1647,7 @@ const m = {
                                     }
                                 }
                                 if (tech.blockDmg) { //electricity
-                                    mob[i].damage(tech.blockDmg * b.dmgScale)
+                                    mob[i].damage(tech.blockDmg * m.dmgScale)
                                     const step = 40
                                     ctx.beginPath();
                                     for (let i = 0, len = 1.5 * tech.blockDmg; i < len; i++) {
@@ -1720,8 +1723,8 @@ const m = {
                 }
                 m.hold = function() {
                     const wave = Math.sin(m.cycle * 0.022);
-                    m.fieldRange = 160 + 12 * wave + 100 * tech.isBigField
-                    m.fieldArc = 0.34 + 0.04 * wave + 0.065 * tech.isBigField //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+                    m.fieldRange = 180 + 12 * wave + 100 * tech.isBigField
+                    m.fieldArc = 0.35 + 0.045 * wave + 0.065 * tech.isBigField //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
                     m.calculateFieldThreshold();
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -2596,7 +2599,7 @@ const m = {
         //                   ctx.fillStyle = `rgba(140,217,255,0.5)`
         //                   ctx.fill()
         //                 } else if (tech.superposition && inPlayer[i].isDropPowerUp) {
-        //                   // inPlayer[i].damage(0.4 * b.dmgScale); //damage mobs inside the player
+        //                   // inPlayer[i].damage(0.4 * m.dmgScale); //damage mobs inside the player
         //                   // m.energy += 0.005;
 
         //                   mobs.statusStun(inPlayer[i], 300)
@@ -2967,9 +2970,9 @@ const m = {
                                                 Matter.Composite.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
-                                                if (tech.isWormholeEnergy) m.energy += 0.63
+                                                if (tech.isWormholeEnergy) m.energy += 0.53
                                                 if (tech.isWormholeSpores) { //pandimensional spermia
-                                                    for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
+                                                    for (let i = 0, len = Math.ceil(2.5 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                         if (tech.isSporeWorm) {
                                                             b.worm(Vector.add(m.hole.pos2, Vector.rotate({
                                                                 x: m.fieldRange * 0.4,
@@ -3001,9 +3004,9 @@ const m = {
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
                                             // if (tech.isWormholeEnergy && m.energy < m.maxEnergy * 2) m.energy = m.maxEnergy * 2
-                                            if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.63
+                                            if (tech.isWormholeEnergy && m.immuneCycle < m.cycle) m.energy += 0.53
                                             if (tech.isWormholeSpores) { //pandimensional spermia
-                                                for (let i = 0, len = Math.ceil(3 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
+                                                for (let i = 0, len = Math.ceil(2.5 * (tech.isSporeWorm ? 0.5 : 1) * Math.random()); i < len; i++) {
                                                     if (tech.isSporeWorm) {
                                                         b.worm(Vector.add(m.hole.pos1, Vector.rotate({
                                                             x: m.fieldRange * 0.4,
@@ -3061,6 +3064,38 @@ const m = {
                         const mag = Vector.magnitude(sub)
 
                         if (input.field) {
+                            if (tech.isWormHolePause) {
+                                const drain = m.fieldRegen + 0.0004
+                                if (m.energy > drain) {
+                                    m.energy -= drain
+                                    if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1/4 seconds // and can't regen
+                                    m.isBodiesAsleep = true;
+
+                                    function sleep(who) {
+                                        for (let i = 0, len = who.length; i < len; ++i) {
+                                            if (!who[i].isSleeping) {
+                                                who[i].storeVelocity = who[i].velocity
+                                                who[i].storeAngularVelocity = who[i].angularVelocity
+                                            }
+                                            Matter.Sleeping.set(who[i], true)
+                                        }
+                                    }
+                                    sleep(mob);
+                                    sleep(body);
+                                    sleep(bullet);
+                                    simulation.cycle--; //pause all functions that depend on game cycle increasing
+                                    Matter.Body.setVelocity(player, { //keep player frozen
+                                        x: 0,
+                                        y: -55 * player.mass * simulation.g //undo gravity before it is added
+                                    });
+                                    player.force.x = 0
+                                    player.force.y = 0
+                                } else {
+                                    m.wakeCheck();
+                                    m.energy = 0;
+                                }
+                            }
+
                             m.grabPowerUp();
                             //draw possible wormhole
                             if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
@@ -3108,6 +3143,8 @@ const m = {
                                 ctx.setLineDash([]);
                             }
                         } else {
+                            if (tech.isWormHolePause && m.isBodiesAsleep) m.wakeCheck();
+
                             //make new wormhole
                             if (
                                 m.hole.isReady && mag > 250 && m.energy > this.drain &&
@@ -3440,16 +3477,20 @@ const m = {
                 m.angle = player.angle
             }
 
-            level.playerExitCheck = () => {
-                if (
-                    player.position.x > level.exit.x &&
-                    player.position.x < level.exit.x + 100 &&
-                    player.position.y > level.exit.y - 150 &&
-                    player.position.y < level.exit.y + 40
-                ) {
-                    level.nextLevel()
-                }
-            }
+
+
+
+
+            // level.exit.drawAndCheck = () => { //fix this
+            //     if (
+            //         player.position.x > level.exit.x &&
+            //         player.position.x < level.exit.x + 100 &&
+            //         player.position.y > level.exit.y - 150 &&
+            //         player.position.y < level.exit.y + 40
+            //     ) {
+            //         level.nextLevel()
+            //     }
+            // }
             m.move = () => {
                 m.pos.x = player.position.x;
                 m.pos.y = player.position.y;
@@ -3577,7 +3618,7 @@ const m = {
                                     m.damage(dmg);
                                     if (tech.isPiezo) m.energy += 20.48;
                                     if (tech.isStimulatedEmission) powerUps.ejectTech()
-                                    if (mob[k].onHit) mob[k].onHit(k);
+                                    if (mob[k].onHit) mob[k].onHit();
                                     if (m.immuneCycle < m.cycle + tech.collisionImmuneCycles) m.immuneCycle = m.cycle + tech.collisionImmuneCycles; //player is immune to damage for 30 cycles
                                     //extra kick between player and mob              //this section would be better with forces but they don't work...
                                     let angle = Math.atan2(player.position.y - mob[k].position.y, player.position.x - mob[k].position.x);
@@ -3616,7 +3657,7 @@ const m = {
                                 //mob + bullet collisions
                                 if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
                                     obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-                                    let dmg = b.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
+                                    let dmg = m.dmgScale * (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                                     if (tech.isCrit && mob[k].isStunned) dmg *= 4
                                     mob[k].damage(dmg);
                                     if (mob[k].alive) mob[k].foundPlayer();
@@ -3635,7 +3676,7 @@ const m = {
                                 if (obj.classType === "body" && obj.speed > 6) {
                                     const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                                     if (v > 9) {
-                                        let dmg = tech.blockDamage * b.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
+                                        let dmg = tech.blockDamage * m.dmgScale * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
                                         if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
                                         if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && m.throwCycle > m.cycle) {

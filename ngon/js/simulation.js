@@ -14,14 +14,16 @@ const simulation = {
         }
         m.move();
         m.look();
-        simulation.checks();
         simulation.camera();
         level.custom();
         powerUps.do();
         mobs.draw();
         simulation.draw.cons();
         simulation.draw.body();
-        mobs.loop();
+        if (!m.isBodiesAsleep) {
+            simulation.checks();
+            mobs.loop();
+        }
         mobs.healthBar();
         m.draw();
         m.hold();
@@ -31,7 +33,7 @@ const simulation = {
         b.fire();
         b.bulletRemove();
         b.bulletDraw();
-        b.bulletDo();
+        if (!m.isBodiesAsleep) b.bulletDo();
         simulation.drawCircle();
         // simulation.clip();
         ctx.restore();
@@ -119,7 +121,7 @@ const simulation = {
     fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
     isCommunityMaps: false,
     cyclePaused: 0,
-    fallHeight: 5000, //below this y position the player dies
+    fallHeight: 6000, //below this y position the player dies
     lastTimeStamp: 0, //tracks time stamps for measuring delta
     delta: 1000 / 60, //speed of game engine //looks like it has to be 16 to match player input
     buttonCD: 0,
@@ -511,12 +513,22 @@ const simulation = {
                 bodies[i].force.y += bodies[i].mass * magnitude;
             }
         }
-        addGravity(powerUp, simulation.g);
-        addGravity(body, simulation.g);
+        if (!m.isBodiesAsleep) {
+            addGravity(powerUp, simulation.g);
+            addGravity(body, simulation.g);
+        }
         player.force.y += player.mass * simulation.g;
     },
     firstRun: true,
     splashReturn() {
+
+        document.getElementById("previous-seed").innerHTML = `previous seed: <span style="font-size:80%;">${Math.initialSeed}</span><br>`
+        document.getElementById("seed").value = Math.initialSeed = Math.seed //randomize initial seed
+
+        //String(document.getElementById("seed").value)
+        // Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
+
+
         simulation.clearTimeouts();
         simulation.onTitlePage = true;
         document.getElementById("splash").onclick = function() {
@@ -640,6 +652,7 @@ const simulation = {
             if (b.guns[i].name === "laser") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
             if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
+            if (b.guns[i].name === "harpoon") b.guns[i].chooseFireMethod()
         }
         tech.dynamoBotCount = 0;
         tech.nailBotCount = 0;
@@ -654,7 +667,9 @@ const simulation = {
         b.setFireMethod()
         b.setFireCD();
         // simulation.updateTechHUD();
-        powerUps.tech.choiceLog = []
+        powerUps.tech.choiceLog = [];
+        powerUps.gun.choiceLog = [];
+        powerUps.field.choiceLog = [];
         powerUps.totalPowerUps = 0;
         powerUps.research.count = 0;
         m.setFillColors();
@@ -689,6 +704,7 @@ const simulation = {
         // simulation.makeTextLog(`input.key.left<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.left}</span>", "<span class='color-text'>ArrowLeft</span>"]`);
         // simulation.makeTextLog(`input.key.down<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.down}</span>", "<span class='color-text'>ArrowDown</span>"]`);
         // simulation.makeTextLog(`input.key.right<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.right}</span>", "<span class='color-text'>ArrowRight</span>"]`);
+        simulation.makeTextLog(`Math.seed <span class='color-symbol'>=</span> ${Math.initialSeed}`);
         simulation.makeTextLog(`<span class='color-var'>const</span> engine <span class='color-symbol'>=</span> Engine.create(); <em>//simulation begin</em>`);
         simulation.makeTextLog(`engine.timing.timeScale <span class='color-symbol'>=</span> 1`);
         // simulation.makeTextLog(`input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>${input.key.field}</span>", "<span class='color-text'>MouseRight</span>"]`);
@@ -873,7 +889,7 @@ const simulation = {
     //   }
     // },
     checks() {
-        if (!(simulation.cycle % 60) && !m.isBodiesAsleep) { //once a second
+        if (!(m.cycle % 60)) { //once a second
             //energy overfill 
             if (m.energy > m.maxEnergy) m.energy = m.maxEnergy + (m.energy - m.maxEnergy) * tech.overfillDrain //every second energy above max energy loses 25%
             if (tech.isFlipFlopEnergy && m.immuneCycle < m.cycle) {
@@ -927,14 +943,14 @@ const simulation = {
             //   }
             // }
 
-            if (m.lastKillCycle + 300 > simulation.cycle) { //effects active for 5 seconds after killing a mob
+            if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                 if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) m.energy += m.maxEnergy * 0.05
                 if (tech.isHealthRecovery) m.addHealth(0.01 * m.maxHealth)
             }
 
-            if (!(simulation.cycle % 420)) { //once every 7 seconds
+            if (!(m.cycle % 420)) { //once every 7 seconds
                 if (tech.isZeno) {
-                    m.health *= 0.9
+                    m.health *= 0.93 //remove 7%
                     m.displayHealth();
                 }
                 if (tech.cyclicImmunity && m.immuneCycle < m.cycle + tech.cyclicImmunity) m.immuneCycle = m.cycle + tech.cyclicImmunity; //player is immune to damage for 60 cycles
