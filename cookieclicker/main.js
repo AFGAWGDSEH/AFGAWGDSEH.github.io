@@ -4205,8 +4205,6 @@ Game.Launch=function()
 				Game.Scroll=(e.detail<0||e.wheelDelta>0)?1:-1;
 				Game.lastActivity=Game.time;
 			};
-			AddEvent(document,'DOMMouseScroll',Game.handleScroll);
-			AddEvent(document,'mousewheel',Game.handleScroll);
 		}
 		else
 		{
